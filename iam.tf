@@ -158,7 +158,7 @@ data "aws_iam_policy_document" "trigger_deploy_pipeline" {
     effect    = "Allow"
     actions   = ["codepipeline:StartPipelineExecution"]
     resources = [
-      aws_codepipeline.pipeline_cicd_pipeline.arn
+      aws_codepipeline.appconfig_pipeline.arn
     ]
   }
 }
