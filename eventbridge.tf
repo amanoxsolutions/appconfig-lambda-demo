@@ -28,6 +28,6 @@ resource "aws_cloudwatch_event_target" "trigger_config_deployment" {
   event_bus_name = "default"
   rule           = aws_cloudwatch_event_rule.config_upload.name
   role_arn       = aws_iam_role.trigger_deploy_pipeline.arn
-  target_id      = aws_codepipeline.pipeline_cicd_pipeline.id
-  arn            = aws_codepipeline.pipeline_cicd_pipeline.arn
+  target_id      = aws_codepipeline.appconfig_pipeline.id
+  arn            = aws_codepipeline.appconfig_pipeline.arn
 }
