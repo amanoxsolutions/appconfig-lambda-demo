@@ -1,4 +1,4 @@
-resource "aws_codepipeline" "pipeline_cicd_pipeline" {
+resource "aws_codepipeline" "appconfig_pipeline" {
   name     = "${random_string.stack_random_prefix.result}-lambda-config-deployment"
   role_arn = aws_iam_role.codepipeline_role.arn
 
