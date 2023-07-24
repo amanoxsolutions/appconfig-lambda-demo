@@ -82,8 +82,7 @@ data "aws_iam_policy_document" "codepipeline_policy" {
     actions = [
       "s3:ListBucket",
       "s3:Get*",
-      "s3:PutObject",
-      "s3:PutObjectAcl"
+      "s3:PutObject*"
     ]
     effect = "Allow"
     resources = [
