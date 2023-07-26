@@ -62,7 +62,7 @@ resource "aws_appconfig_deployment_strategy" "all_at_once" {
 }
 
 resource "aws_appconfig_deployment_strategy" "linear_50_percent" {
-  name                           = "Demo.Linear50PercentEvery2Minutes"
+  name                           = "Demo.Linear50PercentEveryMinute"
   description                    = "Example Deployment Strategy deploying features all at once"
   deployment_duration_in_minutes = 2
   final_bake_time_in_minutes     = 1
