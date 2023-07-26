@@ -132,7 +132,7 @@ resource "aws_appconfig_hosted_configuration_version" "manual_config" {
   content_type             = "application/json"
 
   content = jsonencode({
-    matrix_size            = 100
+    matrix_size = 100
   })
 }
 

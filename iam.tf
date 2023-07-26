@@ -147,15 +147,15 @@ data "aws_iam_policy_document" "trust_events_service" {
 }
 
 resource "aws_iam_role" "trigger_deploy_pipeline" {
-  name = "${random_string.stack_random_prefix.result}-pipeline-trigger-role"
+  name               = "${random_string.stack_random_prefix.result}-pipeline-trigger-role"
   assume_role_policy = data.aws_iam_policy_document.trust_events_service.json
 }
 
 data "aws_iam_policy_document" "trigger_deploy_pipeline" {
   statement {
-    sid       = "AllowStartPipelineExecution"
-    effect    = "Allow"
-    actions   = ["codepipeline:StartPipelineExecution"]
+    sid     = "AllowStartPipelineExecution"
+    effect  = "Allow"
+    actions = ["codepipeline:StartPipelineExecution"]
     resources = [
       aws_codepipeline.appconfig_pipeline.arn
     ]
