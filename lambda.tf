@@ -18,7 +18,7 @@ module "demo_lambda_layer" {
   version  = "~> 5.3.0"
 
   create_layer             = true
-  layer_name               = "${random_string.stack_random_prefix.result}-demo-lambda-layer-${lower(each.value.env)}-${each.value.deployment}"
+  layer_name               = "${random_string.stack_random_prefix.result}-demo-lambda-layer-${lower(each.value.env)}-${each.value.deployment_type}"
   compatible_runtimes      = [var.python_runtime]
   compatible_architectures = [each.value.architecture]
 
@@ -29,7 +29,7 @@ module "demo_lambda_layer" {
   }]
 
   # Only necessary because we are packaging layers from the same source code
-  hash_extra = "extra-hash-for-${lower(each.value.env)}-${each.value.deployment}-lambda-layer-to-prevent-conflicts-with-other-builds"
+  hash_extra = "extra-hash-for-${lower(each.value.env)}-${each.value.deployment_type}-lambda-layer-to-prevent-conflicts-with-other-builds"
 
   build_in_docker = true
   docker_image    = local.docker_image[each.value.architecture]
@@ -45,7 +45,7 @@ module "demo_lambda" {
   source   = "terraform-aws-modules/lambda/aws"
   version  = "~> 5.3.0"
 
-  function_name = "${random_string.stack_random_prefix.result}-demo-lambda-${lower(each.value.env)}-${each.value.deployment}"
+  function_name = "${random_string.stack_random_prefix.result}-demo-lambda-${lower(each.value.env)}-${each.value.deployment_type}"
   description   = "Lambda function which makes some computation"
   handler       = "main.lambda_handler"
   runtime       = var.python_runtime
@@ -62,19 +62,19 @@ module "demo_lambda" {
 
   source_path = "./assets/lambdas/demo-function/main.py"
   # Only necessary because we are packaging lambda functions from the same source code
-  hash_extra = "extra-hash-for-${lower(each.value.env)}-${each.value.deployment}-lambda-function-to-prevent-conflicts-with-other-builds"
+  hash_extra = "extra-hash-for-${lower(each.value.env)}-${each.value.deployment_type}-lambda-function-to-prevent-conflicts-with-other-builds"
 
   environment_variables = {
     ENVIRONMENT                                   = each.value.env
-    DEPLOYMENT                                    = each.value.deployment
+    DEPLOYMENT                                    = each.value.deployment_type
     APPLICATION_NAME                              = var.app_config_application_name
     CONFIG_NAME                                   = var.app_config_config_name
     FEATURE_ACTIVATION_NAME                       = var.app_config_feature_activation_name
     AWS_APPCONFIG_EXTENSION_POLL_INTERVAL_SECONDS = 30
   }
 
-  role_name                         = "${random_string.stack_random_prefix.result}-demo-lambda-${lower(each.value.env)}-${each.value.deployment}-role"
-  role_description                  = "Execution role for the ${random_string.stack_random_prefix.result}-demo-lambda-${lower(each.value.env)}-${each.value.deployment} Lambda function"
+  role_name                         = "${random_string.stack_random_prefix.result}-demo-lambda-${lower(each.value.env)}-${each.value.deployment_type}-role"
+  role_description                  = "Execution role for the ${random_string.stack_random_prefix.result}-demo-lambda-${lower(each.value.env)}-${each.value.deployment_type} Lambda function"
   attach_policy                     = true
   policy                            = aws_iam_policy.demo_lambda.arn
   cloudwatch_logs_retention_in_days = 7

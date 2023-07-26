@@ -15,9 +15,9 @@ variable "python_runtime" {
 variable "envs_config" {
   description = "Environments configuration"
   type = map(object({
-    env          = string
-    deployment   = string
-    architecture = string
+    env             = string
+    deployment_type = string
+    architecture    = string
   }))
 }
 

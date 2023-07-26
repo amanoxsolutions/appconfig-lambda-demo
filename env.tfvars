@@ -1,12 +1,12 @@
 envs_config = {
   prod_manual = {
     env             = "Prod"
-    deployment      = "manual"
+    deployment_type = "manual"
     architecture    = "x86_64"
   },
   test_pipeline = {
     env             = "Test"
-    deployment      = "pipeline"
+    deployment_type = "pipeline"
     architecture    = "arm64"
   }
 }         
