@@ -170,7 +170,7 @@ resource "aws_appconfig_deployment" "feature_flag" {
   configuration_version    = aws_appconfig_hosted_configuration_version.feature_flag.version_number
   deployment_strategy_id   = aws_appconfig_deployment_strategy.all_at_once.id
   description              = "Initial deployment of the feature flag"
-  environment_id           = aws_appconfig_environment.lambda_demo[each.key].environment_id
+  environment_id           = aws_appconfig_environment.lambda_demo[each.value].environment_id
 
   lifecycle {
     ignore_changes = [
@@ -187,7 +187,7 @@ resource "aws_appconfig_deployment" "manual_config" {
   configuration_version    = aws_appconfig_hosted_configuration_version.manual_config.version_number
   deployment_strategy_id   = aws_appconfig_deployment_strategy.all_at_once.id
   description              = "Initial deployment of the manual configuration profile"
-  environment_id           = aws_appconfig_environment.lambda_demo[each.key].environment_id
+  environment_id           = aws_appconfig_environment.lambda_demo[each.value].environment_id
 
   lifecycle {
     ignore_changes = [
