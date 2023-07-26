@@ -38,9 +38,3 @@ variable "app_config_feature_activation_name" {
   type        = string
   default     = "lambda-feature-activation"
 }
-
-variable "triggered_lambda_function" {
-  description = "Then name of the Lambda function environment that will be triggered by the Triggering Lambda function (e.g. test_pipeline)"
-  type        = string
-  default     = "test_pipeline"
-}

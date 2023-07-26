@@ -24,6 +24,10 @@ locals {
   environments = distinct([for env_config in var.envs_config : env_config.env])
   # The list of environments that must be deployed by the pipeline (deployment_type = "pipeline")
   pipeline_environments = distinct([
-    for env_config in var.envs_config : env_config.env if env_config.deployment_type == "pipeline"
+    for env_name, env_config in var.envs_config : env_config.env if env_config.deployment_type == "pipeline"
   ])
+  # The first environment deployed by the pipeline
+  pipeline_first_environment = distinct([
+    for env_name, env_config in var.envs_config : env_name if env_config.deployment_type == "pipeline"
+  ])[0]
 }

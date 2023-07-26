@@ -126,7 +126,7 @@ module "trigger_lambda" {
   source_path = "./assets/lambdas/trigger-function/main.py"
 
   environment_variables = {
-    LAMBDA_ARN   = module.demo_lambda[var.triggered_lambda_function].lambda_function_arn
+    LAMBDA_ARN   = module.demo_lambda[local.pipeline_first_environment].lambda_function_arn
     NB_EXECUTION = 20
   }
 
