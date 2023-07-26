@@ -46,7 +46,7 @@ resource "aws_codepipeline" "appconfig_pipeline" {
           Environment : aws_appconfig_environment.lambda_demo[action.value].environment_id
           ConfigurationProfile : aws_appconfig_configuration_profile.pipeline_config.configuration_profile_id
           DeploymentStrategy : aws_appconfig_deployment_strategy.linear_50_percent.id
-          InputArtifactConfigurationPath : "config/test.json"
+          InputArtifactConfigurationPath : "config/${lower(action.value)}.json"
         }
       }
     }
