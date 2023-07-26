@@ -1,4 +1,7 @@
-Serverless Application Configration With AWS AppConfig Demo 
+# Serverless Application Configration With AWS AppConfig Demo 
+
+## Architecture Diagram
+![Architecture Diagram](./assets/images/appconfig-lambda-demo.drawio.svg)
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
