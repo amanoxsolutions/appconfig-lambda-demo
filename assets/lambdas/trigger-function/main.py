@@ -9,13 +9,13 @@ logger = Logger()
 lbd = boto3.client("lambda")
 
 LAMBDA_ARN = os.environ["LAMBDA_ARN"]
-NB_EXECUTION = os.environ["NB_EXECUTION"]
+NB_EXECUTION = int(os.environ["NB_EXECUTION"])
 
 @logger.inject_lambda_context(log_event=True)
 def lambda_handler(event, context):
     # Invoke in parallel the Lambda function passed as parameter NB_EXECUTION times
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        futures = [executor.submit(invoke_lambda) for _ in range(int(NB_EXECUTION))]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=NB_EXECUTION) as executor:
+        futures = [executor.submit(invoke_lambda) for _ in range(NB_EXECUTION)]
     for response in concurrent.futures.as_completed(futures):
         logger.info(response.result())
 
