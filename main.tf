@@ -1,6 +1,6 @@
 #######  Configure the AWS Provider ###################################################################################
 provider "aws" {
-  region  = var.region
+  region = var.region
 
   default_tags {
     tags = {
@@ -20,5 +20,10 @@ resource "random_string" "stack_random_prefix" {
 }
 
 locals {
-  environments = distinct([ for env_config in var.envs_config: env_config.env ])
+  # The list of environments from the envs_config variable
+  environments = distinct([for env_config in var.envs_config : env_config.env])
+  # The list of environments that must be deployed by the pipeline (deployment_type = "pipeline")
+  pipeline_environments = distinct([
+    for env_config in var.envs_config : env_config.env if env_config.deployment_type == "pipeline"
+  ])
 }

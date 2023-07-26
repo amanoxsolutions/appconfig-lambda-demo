@@ -27,28 +27,28 @@ resource "aws_codepipeline" "appconfig_pipeline" {
     }
   }
 
-    stage {
-      name = "Deploy"
+  stage {
+    name = "Deploy"
 
-      dynamic "action" {
-        for_each = local.environments
-        content {
-          name             = "Deploy${action.value}Config"
-          category         = "Deploy"
-          owner            = "AWS"
-          provider         = "AppConfig"
-          input_artifacts  = ["source_output"]
-          output_artifacts = []
-          version          = "1"
-          run_order        = 1
-          configuration    = {
-            Application : aws_appconfig_application.lambda_demo.id
-            Environment : aws_appconfig_environment.lambda_demo[action.value].environment_id
-            ConfigurationProfile : aws_appconfig_configuration_profile.pipeline_config.configuration_profile_id
-            DeploymentStrategy : aws_appconfig_deployment_strategy.linear_50_percent.id
-            InputArtifactConfigurationPath : "config/test.json"
-          }
+    dynamic "action" {
+      for_each = local.pipeline_environments
+      content {
+        name             = "Deploy${action.value}Config"
+        category         = "Deploy"
+        owner            = "AWS"
+        provider         = "AppConfig"
+        input_artifacts  = ["source_output"]
+        output_artifacts = []
+        version          = "1"
+        run_order        = 1
+        configuration = {
+          Application : aws_appconfig_application.lambda_demo.id
+          Environment : aws_appconfig_environment.lambda_demo[action.value].environment_id
+          ConfigurationProfile : aws_appconfig_configuration_profile.pipeline_config.configuration_profile_id
+          DeploymentStrategy : aws_appconfig_deployment_strategy.linear_50_percent.id
+          InputArtifactConfigurationPath : "config/test.json"
         }
       }
     }
+  }
 }
