@@ -29,5 +29,5 @@ module "s3_bucket_for_codepipeline_artifact" {
 resource "aws_s3_object" "lambda_config" {
   bucket = module.s3_bucket_for_appconfig.s3_bucket_id
   key    = "lambda-config.zip"
-  source = "./lambda-config.zip"
+  source = "./config/lambda-config.zip"
 }
