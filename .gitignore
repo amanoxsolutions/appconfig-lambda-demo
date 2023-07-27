@@ -30,7 +30,7 @@ override.tf.json
 terraform.rc
 
 *.zip
-!config/lambda-config.zip
+!assets/lambda-config.zip
 
 # IDE files
 .idea
