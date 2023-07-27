@@ -35,16 +35,12 @@ def lambda_handler(event, context):
     logger.info(f"Feature activation: {config_json}")
     matrix_decomposition_enabled = config_json.get("enabled")
 
-    # Let's not take the randomness out of random numbers (for reproducibility)
-    # np.random.seed(0)
-
-    size = int(matrix_size)
-    A, B = np.random.random((size, size)), np.random.random((size, size))
-    C, D = np.random.random((size * 128,)), np.random.random((size * 128,))
-    E = np.random.random((int(size / 2), int(size / 4)))
-    F = np.random.random((int(size / 2), int(size / 2)))
+    A, B = np.random.random((matrix_size, matrix_size)), np.random.random((matrix_size, matrix_size))
+    C, D = np.random.random((matrix_size * 128,)), np.random.random((matrix_size * 128,))
+    E = np.random.random((int(matrix_size / 2), int(matrix_size / 4)))
+    F = np.random.random((int(matrix_size / 2), int(matrix_size / 2)))
     F = np.dot(F, F.T)
-    G = np.random.random((int(size / 2), int(size / 2)))
+    G = np.random.random((int(matrix_size / 2), int(matrix_size / 2)))
 
     nb_computations = {
         "nb_mx_dot_computation": 0,
@@ -52,7 +48,7 @@ def lambda_handler(event, context):
     }
 
     # Matrix multiplication
-    logger.info(f"Dotted two {size}x{size} matrices.")
+    logger.info(f"Dotted two {matrix_size}x{matrix_size} matrices.")
     N = np.random.randint(100, 200)
     for i in range(N):
         np.dot(A, B)
@@ -60,7 +56,7 @@ def lambda_handler(event, context):
     del A, B
 
     # Vector multiplication
-    logger.info(f"Dotted two vectors of length {size * 128}.")
+    logger.info(f"Dotted two vectors of length {matrix_size * 128}.")
     N = np.random.randint(100, 200)
     for i in range(N):
         np.dot(C, D)
@@ -75,7 +71,7 @@ def lambda_handler(event, context):
         })
 
         # Singular Value Decomposition (SVD)
-        logger.info("SVD of a {size}x{size} matrices.")
+        logger.info(f"SVD of a {matrix_size}x{matrix_size} matrices.")
         N = np.random.randint(100, 200)
         for i in range(N):
             np.linalg.svd(E, full_matrices=False)
@@ -83,21 +79,21 @@ def lambda_handler(event, context):
         del E
 
         # Cholesky Decomposition
-        logger.info("Cholesky decomposition of a {size}x{size} matrice.")
+        logger.info(f"Cholesky decomposition of a {matrix_size}x{matrix_size} matrice.")
         N = np.random.randint(100, 200)
         for i in range(N):
             np.linalg.cholesky(F)
         nb_computations["nb_mx_cholesky_computation"] = N
 
         # Eigendecomposition
-        logger.info("Eigendecomposition of a {size}x{size} matrice.")
+        logger.info(f"Eigendecomposition of a {matrix_size}x{matrix_size} matrice.")
         N = np.random.randint(100, 200)
         for i in range(N):
             np.linalg.eig(G)
         nb_computations["nb_mx_eig_computation"] = N
 
-        # Log computations
-        logger.info({"nb_computations": nb_computations})
+    # Log computations
+    logger.info({"nb_computations": nb_computations})
 
     # Add number of computation as custom metrics
     for name, value in nb_computations.items():
