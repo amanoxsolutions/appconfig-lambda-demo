@@ -1,7 +1,177 @@
-# Serverless Application Configration With AWS AppConfig Demo 
+# Demo of Serverless Application Configration with AWS AppConfig 
+This repository contains a demo showing how to use AWS AppConfig to manage the configuration of a serverless application
+using AWS Lambda Functions outside the application infrastructure code (here Terraform).
 
-## Architecture Diagram
+Whether you use Terraform or the AWS CDK, the 
+* AWS Lambda Function configuration (e.g. memory size, ARM vs X86 architecture)
+* Related resources (e.g. IAM Role, CloudWatch Logs)
+* The code
+* The application configuration (e.g. an application threshold value) passed as environment variables
+
+are often all mixed together in the same repository. In such cases changing an application configuration parameter 
+passed to the code as an AWS Lambda Function environment variable requires the redeployment of the application 
+infrastructure stack.
+
+Wouldn’t it be nice to decouple the AWS Lambda Function configuration from the infrastructure code?
+
+This is where AWS AppConfig (a component of AWS Systems Manager) can help.
+## Demo Architecture Diagram
 ![Architecture Diagram](./assets/images/appconfig-lambda-demo.svg)
+
+## Deploying the Demo
+Please refer to this demo's [Terraform Documentation](./TERRAFORM.md) for more details about this Terraform code and
+options.
+
+1. Clone this repo and navigate into the repository folder.
+2. From your CLI, initialize and deploy this demo infrastructure using Terraform
+    ```bash
+    terraform init
+    terraform apply -var-file=env.tfvars
+    ```
+
+You can update the `env.tfvars` file to change or add the environments you want to deploy and test.
+The configuration of the environments is done using the variable `envs_config` in the `env.tfvars` file as follows:
+```hcl
+envs_config = {
+  environment_key = {
+    env             = "Environment name e.g. 'Prod'"
+    deployment_type = "Type of deployment e.g. 'manual' or 'pipeline'"
+    architecture    = "Type of AWS Lambda Function architecture e.g. 'x86_64' or 'arm64'"
+  }
+}    
+```
+
+This demonstrates how infrastructure configuration is separated from the application configuration handled through AWS 
+AppConfig.
+
+## Running the Demo
+### Test Environment Configuration Change
+1. Navigate to the AWS Lambda service and the `********-demo-lambda-test-manual` function
+2. Click on the `Test` button, leave the `Event` empty or as default, click on the `Save` button and then again on the
+`Test` button
+3. You will see in the logs the value of the `matrix_size` parameter and the feature flag
+```text
+"message":"Application configuration: {'matrix_size': 50}"
+"message":"Feature activation: {'enabled': False}"
+```
+4. Navigate to the AWS AppConfig service (within AWS Systems Manager) and the `lambda-demo` application
+5. Open the `lambda-config-manual` configuration profile. You will see the current configuration version displayed with 
+the current value of the `matrix_size` parameter 
+![Hosted Configuration](./assets/images/screenshot-appconfig-hosted-config.png)
+6. Click on the `Create` button and change the `matrix_size` parameter value to a different value (e.g. 70) and click 
+on the `Create hosted configuration version` button
+7. Make sure your new version with the new value is selected and click on the `Start deployment` button 
+8. Select the `Test` environment and the `Demo.AllAtOnce` deployment strategy and click on the `Start deployment` button
+9. Navigate back to the AWS Lambda service and the `********-demo-lambda-test-manual` function and retest the function. 
+You might not see the changes immediately due to the 30 seconds caching of the AWS AppConfig extension. In that case 
+wait for 30 seconds (for the cache to clear) and retest the function; you should see the new value of the `matrix_size` 
+parameter
+### Prod Environment Configuration Change
+1. Navigate to the AWS Lambda service and the `********-demo-lambda-prod-pipeline` function
+2. Click on the `Test` button, leave the Event empty or as default, click on the `Save` button and then again on the
+`Test` button
+3. You will see in the logs the value of the `matrix_size` parameter and the feature flag
+```text
+"message":"Application configuration: {'matrix_size': 100}"
+"message":"Feature activation: {'enabled': False}"
+```
+4. In the `assets/config/` folder of this repository, edit the `prod.json` file and change the value of the `matrix_size`. 
+5. Package the `assets/config/` folder in a zip archive named `lambda-config.zip` and upload it to the 
+`********-codepipeline-appconfig-lambda-test` S3 bucket
+6. Navigate to the AWS CodePipeline service and the `********-lambda-config-deployment` pipeline. You should see the
+pipeline starting to deploy the new configuration in the `Prod` environment
+7. Navigate back to the AWS Lambda service and the `********-demo-lambda-prod-pipeline` function. Depending on whether 
+the cache has expired or not and whether AWS Appconfig will decide to use the old or new value, you might still see the
+old value if you execute the function. Wait for the deployment to complete and retest the function; you should see the 
+new `matrix_size` parameter value.
+### Activating the Feature Flag
+In this demo the feature flag controls whether additional matrix decomposition operations are performed or not by the 
+AWS Lambda Functions. The feature flag is set to `False` by default. In the CloudWatch logs and metrics you will see 
+only 2 operations performed: matrix and vector multiplications (the number of computations will vary as they are random).
+```text
+"message":"Dotted two 70x70 matrices."
+"message":"Dotted two vectors of length 8960."
+"message": {
+     "nb_computations": {
+         "nb_mx_dot_computation": 166,
+         "nb_vect_dot_computation": 103,
+     }
+}
+```
+To activate the feature flag:
+1. Navigate back to the AWS AppConfig service (within AWS Systems Manager) and the `lambda-demo` application
+2. Open the `lambda-feature-activation` feature flag
+3. Click on the `Matrix decomposition` activation button, then on the `Save new version` button
+
+   ![Feature Flag Configuration](./assets/images/screenshot-appconfig-feature-flag.png)
+4. Make sure your new version is selected and click on the `Start deployment` button
+5. Select the `Test` environment and the `Demo.AllAtOnce` deployment strategy and click on the `Start deployment` button
+6. Navigate back to the AWS Lambda service and the `********-demo-lambda-test-manual` function and retest the function.
+You might not see the changes immediately due to the 30 seconds caching of the AWS AppConfig extension. In that case
+wait for 30 seconds for the cache to refresh and retest the function. You should see the feature flag activated in the 
+CloudWatch logs:
+```text
+"message":"Application configuration: {'matrix_size': 70}"
+"message":"Feature activation: {'enabled': True}"
+``` 
+You should also see 3 additional matrix decomposition operations performed in the CloudWatch logs and metrics (the 
+number of computations will vary as they are random).
+```text
+"message":"Dotted two 70x70 matrices."
+"message":"Dotted two vectors of length 8960."
+"message":"SVD of a 70x70 matrices."
+"message":"Cholesky decomposition of a 70x70 matrice."
+"message":"Eigendecomposition of a 70x70 matrice.
+"message": {
+     "nb_computations": {
+         "nb_mx_dot_computation": 143,
+         "nb_vect_dot_computation": 143,
+         "nb_mx_svd_computation": 185,
+         "nb_mx_cholesky_computation": 186,
+         "nb_mx_eig_computation": 156
+     }
+}
+```
+### Linear Deployments and Cache Refresh
+An extra AWS Lambda Function is provided which will perform 20 parallel (almost) synchronous invocation of the Prod 
+environment application to test the linear deployment. If you change again the matrix_size parameter in the prod 
+configuration file and perform these steps
+1. trigger the `********-trigger-lambda` function to cache configuration
+2. then push a new version of the configuration file following the instructions above
+3. re-trigger the `********-trigger-lambda` function within 30 seconds after the deployment started
+4. re-trigger the `********-trigger-lambda` function after 30 seconds but before the end of the deployment (within 60 
+seconds) 
+5. re-trigger the `********-trigger-lambda` function some time after the deployment is finished
+
+you will see in CloudWatch Logs of the `********-trigger-lambda` function, the matrix_size parameter changing for the 20 
+AWS Lambda Function executions. You might notice however, that during the deployment you will not get immediately and 
+not exactly 10 AWS Lambda Functions with the old value and 10 with the new value. 
+
+Why?
+
+![Deployment Timeline](./assets/images/appconfig-deployment-timeline.svg)
+
+If there was no caching (top timeline in the drawing), the AWS Lambda Function would always query the AWS AppConfig 
+service for configuration. With this demo configuration, during the deployment the AWS AppConfig service answers half of 
+the time with the old value and half of the time with the new value. And because in such a scenario the Lambda Function 
+would not cache values, the application would use half of the time the old configuration and half of the time the new 
+configuration.
+
+But the AWS Lambda Function AppConfig extension is caching (30 seconds in the demo), and you also don’t control which 
+Lambda Function will answer a request. This has 4 impacts (the first 3 are depicted in the second timeline):
+1. Even once the deployment has started, if all AWS Lambda Function AppConfig s still have a valid cache, all 
+executions will still use the old configuration values
+2. Once all function extensions start to refresh their cache, depending on refreshing time and which function is 
+executed you will not get the exact percentage of old vs new values
+3. After the deployment is finished, if some function extensions are still caching the old value, these function 
+executions will still use the old value. Only __once the deployment is finished and all functions have refreshed their 
+cache__ will the application fully use the new configuration.
+4. If alarms are raised during the bake time and the configuration is rolled back, depending on the cache configuration 
+it will take some time for the rollback to be complete.
+
+In short the deployment strategy (50% over a 1 minute duration in the demo) controls how AWS AppConfig will reply to API 
+calls for configuration value. But due to caching and function execution management the rate at which the AWS Lambda 
+Functions will use the updated configuration will vary.
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
