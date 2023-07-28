@@ -8,11 +8,11 @@ Whether you use Terraform or the AWS CDK, the
 * The code
 * The application configuration (e.g. an application threshold value) passed as environment variables
 
-are often all mixed together in the same repository. In such cases changing an application configuration parameter 
+are often mixed together in the same repository. In such cases changing an application configuration parameter 
 passed to the code as an AWS Lambda Function environment variable requires the redeployment of the application 
 infrastructure stack.
 
-Wouldn’t it be nice to decouple the AWS Lambda Function configuration from the infrastructure code?
+Wouldn’t it be nice to decouple the function application configuration from the infrastructure configuration and code? 
 
 This is where AWS AppConfig (a component of AWS Systems Manager) can help.
 ## Demo Architecture Diagram
