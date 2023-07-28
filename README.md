@@ -17,8 +17,7 @@ Wouldn’t it be nice to decouple the AWS Lambda Function configuration from the
 This is where AWS AppConfig (a component of AWS Systems Manager) can help.
 ## Demo Architecture Diagram
 ![Architecture Diagram](./assets/images/appconfig-lambda-demo.svg)
-
-## Deploying the Demo
+### Deploying the Demo
 Please refer to this demo's [Terraform Documentation](./TERRAFORM.md) for more details about this Terraform code and
 options.
 
@@ -40,10 +39,15 @@ envs_config = {
   }
 }    
 ```
-
 This demonstrates how infrastructure configuration is separated from the application configuration handled through AWS 
 AppConfig.
-
+### Destroying the Demo
+To be able to destroy AWS AppConfig Configuration profiles and feature flags, the deployments of those configurations 
+and features must be deleted in order to be able to delete the configuration profiles and feature flags themselves. But
+performing the demo, you will create versions of these configurations and features which Terraform does not know about 
+and will not delete by itself. Also, Terraform does not provide an option to force the cleanup of versions when deleting 
+these resources. So you have to manually delete the versions of the configurations and feature flages before destroying 
+the demo, otherwise the Terraform destroy will fail.
 ## Running the Demo
 ### Test Environment Configuration Change
 1. Navigate to the AWS Lambda service and the `********-demo-lambda-test-manual` function
